@@ -6,10 +6,12 @@ import { UserService } from 'src/user/user.service';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from '../auth/jwt.strategy';
+import { PrismaModule } from 'src/prisma/prisma.module';
 
 @Module({
   imports: [
     UserModule,
+    PrismaModule,
     PassportModule,
     JwtModule.register({
       secret: 'yourSecretKey', 

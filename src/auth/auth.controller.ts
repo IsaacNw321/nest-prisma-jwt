@@ -1,6 +1,8 @@
 import { Controller, Post, Body, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from '../auth/auth.service';
 import { LoginDto } from './dto/login.dto';
+import { CreateUserDto } from './dto/login.dto';
+import { Prisma } from 'generated/prisma';
 
 @Controller('auth')
 export class AuthController {
@@ -13,5 +15,10 @@ export class AuthController {
       throw new UnauthorizedException();
     }
     return this.authService.login(user);
+  }
+  @Post('signup')
+  async signup(@Body() createUserDto: Prisma.UserCreateInput) {
+    const result = await this.authService.createUser(createUserDto); 
+    return result; 
   }
 }
