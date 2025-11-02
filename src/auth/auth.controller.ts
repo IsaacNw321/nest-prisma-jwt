@@ -1,12 +1,13 @@
 import { Controller, Post, Body, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from '../auth/auth.service';
 import { LoginDto } from './dto/login.dto';
-import { CreateUserDto } from './dto/login.dto';
-import { Prisma } from 'generated/prisma';
-
+import { User } from 'generated/prisma';
+import { UserService } from 'src/user/user.service';
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+  ) {}
 
   @Post('login')
   async login(@Body() loginDto: LoginDto) {
@@ -16,9 +17,8 @@ export class AuthController {
     }
     return this.authService.login(user);
   }
-  @Post('signup')
-  async signup(@Body() createUserDto: Prisma.UserCreateInput) {
-    const result = await this.authService.createUser(createUserDto); 
-    return result; 
+  @Post('signup')  
+  async createTask(@Body() data : User){
+    return this.authService.createUser(data)
   }
 }
