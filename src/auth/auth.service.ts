@@ -24,7 +24,7 @@ async createUser(data: Prisma.UserCreateInput) {
 
   async validateUser(email: string, pass: string): Promise<UNP |null> {
     const user = await this.userService.getUserByEmail(email);
-    if (user && user.password === pass) { 
+     if (user && (await bcrypt.compare(pass, user.password))) {
       const { password, ...result } = user;
       return result
     }
