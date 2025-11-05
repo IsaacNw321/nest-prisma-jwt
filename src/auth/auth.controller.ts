@@ -29,16 +29,16 @@ export class AuthController {
     if (!user) {
        throw new UnauthorizedException('Invalid credentials');
     }
-    const access_Token  = await this.authService.login(user);
+    const access_token  = await this.authService.login(user);
     
-    response.cookie('access_token', access_Token, {
-      httpOnly: true, 
-      secure: process.env.NODE_ENV === 'production', 
-      sameSite: 'lax', 
-      maxAge: 3600000, 
-    });
+    response.cookie('access_token', access_token, {
+  httpOnly: true,
+  secure: false, 
+  sameSite: 'none', 
+  maxAge: 3600000,
+});
 
-    return { message: 'Login successful' };
+    return  access_token ;
 
   }
   @Post('signup')  
@@ -48,5 +48,11 @@ export class AuthController {
       throw new Error("Something went wrong")
     }
     return this.authService.login(newUser)
+  }
+
+  @Post('refresh')
+  async refreshToken(@Req() req) {
+    const { access_token } = await this.authService.refreshToken(req.user);
+    return { access_token };
   }
 }

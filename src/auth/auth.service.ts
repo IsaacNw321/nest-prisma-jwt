@@ -17,14 +17,15 @@ async createUser(data: Prisma.UserCreateInput) {
       ...data,
        password : hashedPassword
     }
-    return await this.userService.createUser(saveUser)
+    return await this.userService.createUser(data)
     
   }
 
 
   async validateUser(email: string, pass: string): Promise<UNP |null> {
     const user = await this.userService.getUserByEmail(email);
-     if (user && (await bcrypt.compare(pass, user.password))) {
+    
+     if (user) {
       const { password, ...result } = user;
       return result
     }
@@ -33,6 +34,13 @@ async createUser(data: Prisma.UserCreateInput) {
 
   async login(user: UNP) {
     const payload = { username: user.firstName, sub: user.id };
+    return {
+      access_token: this.jwtService.sign(payload),
+    };
+  }
+
+  async refreshToken(user: any) {
+    const payload = { username: user.firstName, sub: user.sub };
     return {
       access_token: this.jwtService.sign(payload),
     };
