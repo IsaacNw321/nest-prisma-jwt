@@ -40,7 +40,7 @@ async createUser(data: Prisma.UserCreateInput) {
   }
 
   async refreshToken(user: any) {
-    const payload = { username: user.firstName, sub: user.sub };
+    const payload = { username: user.firstName, sub: user.id };
     return {
       access_token: this.jwtService.sign(payload),
     };

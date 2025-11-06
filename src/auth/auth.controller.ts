@@ -13,7 +13,7 @@ import { AuthService } from '../auth/auth.service';
 import { Response, Request } from 'express';
 import { LoginDto } from './dto/login.dto';
 import { User } from 'generated/prisma';
-
+import { JwtAuthGuard } from './jwt-auth.guard';
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -49,10 +49,10 @@ export class AuthController {
     }
     return this.authService.login(newUser)
   }
-
+  @UseGuards(JwtAuthGuard)
   @Post('refresh')
-  async refreshToken(@Req() req) {
-    const { access_token } = await this.authService.refreshToken(req.user);
+  async refreshToken(@Body() user : User) {
+    const { access_token } = await this.authService.refreshToken(user);
     return { access_token };
   }
 }
