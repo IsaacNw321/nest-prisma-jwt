@@ -14,11 +14,16 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Role {
+  USER
+  SUPERUSER
+}
 
 model User {
   id             String      @id @default(uuid())
   firstName      String?
   lastName       String?
   email          String      @unique
-  password       String  
+  password       String 
+  role Role @default(USER) 
 }

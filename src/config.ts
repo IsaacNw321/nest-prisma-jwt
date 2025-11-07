@@ -1,0 +1,1 @@
+export const MySecret = "api-auth-secret"
