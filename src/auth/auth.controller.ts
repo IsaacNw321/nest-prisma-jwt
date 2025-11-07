@@ -52,7 +52,19 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Post('refresh')
   async refreshToken(@Body() user : User) {
-    const { access_token } = await this.authService.refreshToken(user);
-    return { access_token };
+    const  access_token  = await this.authService.refreshToken(user);
+    return  access_token ;
+  }
+
+  @Post('logout')
+  async logout(@Res({ passthrough: true }) response: Response) {
+    response.cookie('access_token', '', {
+      httpOnly: true,
+      secure: false, 
+      sameSite: 'none', 
+      expires: new Date(0), 
+    });
+
+    return { message: 'Logout successful and session cleared' };
   }
 }
