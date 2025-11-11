@@ -1,6 +1,6 @@
 import { Exclude } from 'class-transformer';
 import { Chat } from '../../chats/entities/chat.entity';
-import { Message } from '../../chats/entities/message.entity';
+import { Message } from 'src/messages/entities/message.entity';
 
 export enum Role {
   USER = 'USER',

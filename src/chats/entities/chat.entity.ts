@@ -1,5 +1,5 @@
 import {User} from "../../user/entities/user.entitie"
-import { Message } from './message.entity';
+import { Message } from 'src/messages/entities/message.entity';
 
 export class Chat {
   id: string;
