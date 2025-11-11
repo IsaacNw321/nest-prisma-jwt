@@ -1,6 +1,6 @@
 
 import { IsString, IsEmail, MinLength } from 'class-validator';
-import { User } from 'generated/prisma';
+import { User } from 'src/user/entities/user.entitie';
 export class LoginDto {
   email: string;
   password: string;
@@ -8,7 +8,7 @@ export class LoginDto {
 
 
 
-type CreateUserType = Omit<User, 'id' | 'createdAt' | 'updatedAt'>; 
+type CreateUserType = Omit<User,'role' | 'age' | 'id' | 'createdAt' | 'updatedAt'>; 
 export class CreateUserDto implements CreateUserType {
   
   @IsEmail()
@@ -20,20 +20,14 @@ export class CreateUserDto implements CreateUserType {
 
 
  @IsString()
-  firstName: string | null;
-
-  @IsString()
-  lastName: string | null;
+  userName: string ;
 
 }
-type UserType = Omit<User, 'password' | 'createdAt' | 'updatedAt' | 'email'>; 
+type UserType = Omit<User, 'age' |'role' | 'password' | 'createdAt' | 'updatedAt' | 'email'>; 
 export class UNP implements UserType {
  @IsString()
   id : string
  @IsString()
-  firstName: string | null;
-
-  @IsString()
-  lastName: string | null;
+  userName: string ;
 
 }

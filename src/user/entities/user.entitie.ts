@@ -11,9 +11,9 @@ export class User {
   id: string;
   userName: string;
   email: string;
-  age: number;
   role: Role;
   @Exclude()
+  age: number;
   password: string; 
   chats?: Chat[];
   messages?: Message[];
