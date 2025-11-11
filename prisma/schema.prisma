@@ -14,16 +14,34 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id        String    @id @default(uuid())
+  userName  String    @unique
+  email      String   @unique
+  age        Int       
+  password  String
+  role      Role      @default(USER)
+  chats     Chat[]    @relation("UserChats")
+  messages  Message[] @relation("UserMessages")
+}
+
+model Chat {
+  id        String    @id @default(uuid())
+  users     User[]    @relation("UserChats")
+  messages  Message[]
+}
+
+model Message {
+  id        String    @id @default(uuid())
+  body      String
+  from      User     @relation("UserMessages", fields: [fromId], references: [id])
+  fromId    String
+  chat      Chat     @relation(fields: [chatId], references: [id])
+  chatId    String
+  createdAt DateTime @default(now())
+}
+
 enum Role {
   USER
   SUPERUSER
-}
-
-model User {
-  id             String      @id @default(uuid())
-  firstName      String?
-  lastName       String?
-  email          String      @unique
-  password       String 
-  role Role @default(USER) 
 }

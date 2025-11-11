@@ -1,0 +1,24 @@
+import { Exclude } from 'class-transformer';
+import { Chat } from '../../chats/entities/chat.entity';
+import { Message } from '../../chats/entities/message.entity';
+
+export enum Role {
+  USER = 'USER',
+  SUPERUSER = 'SUPERUSER',
+}
+
+export class User {
+  id: string;
+  userName: string;
+  email: string;
+  age: number;
+  role: Role;
+  @Exclude()
+  password: string; 
+  chats?: Chat[];
+  messages?: Message[];
+
+  constructor(partial: Partial<User>) {
+    Object.assign(this, partial);
+  }
+}
