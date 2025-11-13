@@ -47,4 +47,20 @@ export class ChatsService {
       }
     });
   }
+  async findChatByUsers(user1Id: string, user2Id: string): Promise<Chat | null> {
+    const prismaChat = await this.prisma.chat.findFirst({
+      where: {
+        AND: [
+        { users: { some: { id: user1Id } } }, 
+        { users: { some: { id: user2Id } } }
+        ]
+      },
+    });
+
+    if (!prismaChat) {
+      return null;
+    }
+      return plainToInstance(Chat, prismaChat);
+    }
+
 }

@@ -1,11 +1,28 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { ChatsService } from './chats.service';
 import { CreateChatDto } from './dto/create-chat.dto';
 import { UpdateChatDto } from './dto/update-chat.dto';
+import { NotFoundException } from '@nestjs/common';
 
 @Controller('chats')
 export class ChatsController {
   constructor(private readonly chatsService: ChatsService) {}
+
+@Get('find')
+  async findChatByUsers(
+    @Query('user1') user1Id: string, 
+    @Query('user2') user2Id: string
+  ) {
+    if (!user1Id || !user2Id) {
+      throw new NotFoundException('Both user1 and user2 IDs must be provided.');
+    }
+    const chat = await this.chatsService.findChatByUsers(user1Id, user2Id);
+    if (!chat) {
+        throw new NotFoundException('Chat between these two users not found.');
+    }
+    
+  return chat;
+}
 
   @Post()
   create(@Body() createChatDto: CreateChatDto) {

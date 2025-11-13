@@ -33,14 +33,14 @@ async createUser(data: CreateUserDto) : Promise<User> {
     return null;
   }
 
-  async login(user: User) {
+  async login(user: UNP) {
     const payload = { username: user.userName, sub: user.id };
     return {
       access_token: this.jwtService.sign(payload),
     };
   }
 
-  async refreshToken(user: User) {
+  async refreshToken(user: UNP) {
     const payload = { username: user.userName, sub: user.id };
     return {
       access_token: this.jwtService.sign(payload),
