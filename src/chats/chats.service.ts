@@ -8,16 +8,38 @@ import { plainToInstance } from 'class-transformer';
 export class ChatsService {
   constructor(private prisma : PrismaService) {}
   async findAll(): Promise<Chat[]> {
-     const prismaChats = await this.prisma.chat.findMany();
+     const prismaChats = await this.prisma.chat.findMany({
+      include : {
+        users : true
+      }
+     });
     return plainToInstance(Chat, prismaChats);
   }
-  async create(data :  CreateChatDto): Promise<Chat>  {
-    const prismaChat = await this.prisma.chat.create({
-      data
-    });
-    return plainToInstance(Chat, prismaChat);
-  }
-
+async create(data: CreateChatDto): Promise<Chat | null> {
+    try {
+        const { userIds } = data; 
+        const connectUsers = userIds.map(id => ({ id }));
+        const prismaChat = await this.prisma.chat.create({
+            data: {
+                users: {
+                    connect: connectUsers 
+                },
+            },
+            include: {
+                users: {
+                    select: { id: true, userName: true, email: true } 
+                }
+            }
+        });  
+        if (userIds.length < 2) {
+            throw new Error("A chat must have at least two users.");
+        }
+        return plainToInstance(Chat, prismaChat);
+    } catch (error) {
+        console.error("Error creating chat:", error); 
+        return null;
+    }
+}
 
   async getChatById(id: string): Promise<Chat | null> {
       const prismChat = await this.prisma.user.findUnique({
@@ -47,20 +69,39 @@ export class ChatsService {
       }
     });
   }
-  async findChatByUsers(user1Id: string, user2Id: string): Promise<Chat | null> {
+async findChatByUsers(userIds: string[]): Promise<Chat | null> {
+    const sortedUserIds = [...userIds].sort(); 
+    const allUsersPresentCondition = sortedUserIds.map(id => ({
+        users: { some: { id: id } }
+    }));
+    const noExtraUsersCondition = {
+        users: {
+            none: {
+                id: {
+                    notIn: sortedUserIds,
+                }
+            }
+        }
+    };
     const prismaChat = await this.prisma.chat.findFirst({
-      where: {
-        AND: [
-        { users: { some: { id: user1Id } } }, 
-        { users: { some: { id: user2Id } } }
-        ]
-      },
+        where: {
+            AND: [
+                ...allUsersPresentCondition,
+                noExtraUsersCondition,      
+            ]
+        },
+        include: {
+            users: { select: { id: true } }
+        }
     });
 
     if (!prismaChat) {
-      return null;
+        return null;
     }
-      return plainToInstance(Chat, prismaChat);
+    if (prismaChat.users.length !== userIds.length) {
+        return null;
     }
+    return plainToInstance(Chat, prismaChat);
+}
 
 }
