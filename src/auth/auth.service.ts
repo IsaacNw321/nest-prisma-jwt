@@ -26,7 +26,7 @@ async createUser(data: CreateUserDto) : Promise<User> {
   async validateUser(email: string, pass: string): Promise<UNP |null> {
     const user = await this.userService.getUserByEmail(email);
     
-     if (user) {
+     if (user && user.password === pass) {
       const { password, ...result } = user;
       return result
     }

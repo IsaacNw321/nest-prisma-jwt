@@ -9,18 +9,17 @@ export class ChatsController {
   constructor(private readonly chatsService: ChatsService) {}
 
 @Get('find')
-async findChatByUsers(@Query('userIds') userIds: string[] | string): Promise<Chat | null> {
+async findChatByUsers(@Query('userIds') userIds: string | string[]): Promise<Chat | null> {
     const ids = Array.isArray(userIds) ? userIds : [userIds];
-    
-    if (ids.length < 2) {
-        throw new NotFoundException('A chat must have at least two users.');
+    const validIds = ids.filter(id => id && id.length > 0);
+    if (validIds.length < 2) {
+        throw new NotFoundException('A chat must have at least two user IDs.');
     }
-    
-    const chat = await this.chatsService.findChatByUsers(ids);
-    
+    const chat = await this.chatsService.findChatByUsers(validIds);
     if (!chat) {
         throw new NotFoundException('Chat not found for the specified users.');
     }
+    
     return chat;
 }
   @Post()

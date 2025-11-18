@@ -42,15 +42,28 @@ async create(data: CreateChatDto): Promise<Chat | null> {
 }
 
   async getChatById(id: string): Promise<Chat | null> {
-      const prismChat = await this.prisma.user.findUnique({
-        where: {
-          id: id
+     try {
+        const prismaChat = await this.prisma.chat.findUnique({
+            where: {
+                id: id
+            },
+            include: {
+                messages: true,
+                users: {
+                    select: { id: true, userName: true } 
+                }
+            }
+        });
+        
+        if (!prismaChat) {
+            return null;
         }
-      });
-      if (!prismChat) {
+        return plainToInstance(Chat, prismaChat); 
+        
+    } catch (error) {
+        console.error("Error fetching chat with messages:", error);
         return null;
-      }
-      return plainToInstance(Chat, prismChat);
+    }
     }
 
   update(id: string, data : UpdateChatDto) {
@@ -87,19 +100,18 @@ async findChatByUsers(userIds: string[]): Promise<Chat | null> {
         where: {
             AND: [
                 ...allUsersPresentCondition,
-                noExtraUsersCondition,      
+                noExtraUsersCondition,
             ]
         },
         include: {
-            users: { select: { id: true } }
+            users: { select: { id: true, userName : true } }
         }
     });
-
     if (!prismaChat) {
         return null;
     }
     if (prismaChat.users.length !== userIds.length) {
-        return null;
+        return null; 
     }
     return plainToInstance(Chat, prismaChat);
 }

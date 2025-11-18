@@ -4,14 +4,18 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { ChatsModule } from './chats/chats.module';
 import { MessagesModule } from './messages/messages.module';
-
+import { ConfigModule } from '@nestjs/config';
 @Module({
   imports: [
     UserModule, 
     PrismaModule, 
     AuthModule, 
     ChatsModule, 
-    MessagesModule],
+    MessagesModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+  ],
   controllers: [],
   providers: [],
 })
