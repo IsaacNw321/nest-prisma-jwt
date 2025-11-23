@@ -18,20 +18,23 @@ async createUser(data: CreateUserDto) : Promise<User> {
       ...data,
        password : hashedPassword
     }
-    return await this.userService.createUser(data)
+    return await this.userService.createUser(saveUser)
     
   }
 
 
-  async validateUser(email: string, pass: string): Promise<UNP |null> {
-    const user = await this.userService.getUserByEmail(email);
-    
-     if (user && user.password === pass) {
-      const { password, ...result } = user;
-      return result
-    }
-    return null;
+async validateUser(email: string, pass: string): Promise<UNP | null> {
+ const user = await this.userService.getUserByEmail(email);
+  if (!user) {
+   return null;
   }
+  const isMatch = await bcrypt.compare(pass, user.password);
+  if (isMatch) {
+   const { password, ...result } = user;
+   return result;
+  }
+  return null;
+ }
 
   async login(user: UNP) {
     const payload = { username: user.userName, sub: user.id };
