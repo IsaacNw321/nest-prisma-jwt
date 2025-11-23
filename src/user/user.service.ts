@@ -1,63 +1,99 @@
-import { Injectable } from "@nestjs/common";
-import { PrismaService } from "src/prisma/prisma.service"; 
+import { Injectable, NotFoundException, ConflictException, InternalServerErrorException } from "@nestjs/common";
+import { PrismaService } from "src/prisma/prisma.service";
 import { User } from "./entities/user.entitie";
 import { plainToInstance } from 'class-transformer';
 import { CreateUserDto } from "./dto/createUser.dto";
 import { UpdateUserDto } from "./dto/updateUser.dto";
+import { Prisma } from "generated/prisma";
 
 @Injectable()
 export class UserService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
+
   async getAllUsers(): Promise<User[]> {
-    const prismaUsers = await this.prisma.user.findMany();
-    return plainToInstance(User, prismaUsers);
-  }
-  async getUserById(id: string): Promise<User | null> {
-    const prismaUser = await this.prisma.user.findUnique({
-      where: {
-        id: id
-      }
-    });
-    if (!prismaUser) {
-      return null;
+    try {
+      const prismaUsers = await this.prisma.user.findMany();
+      return plainToInstance(User, prismaUsers);
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to fetch users');
     }
-    return plainToInstance(User, prismaUser);
   }
 
-  async getUserByEmail(email: string): Promise<User | null> {
-    const prismaUser = await this.prisma.user.findUnique({
-      where: {
-        email: email,
-      },
-    });
-    if (!prismaUser) {
-      return null;
+  async getUserById(id: string): Promise<User> {
+    try {
+      const prismaUser = await this.prisma.user.findUnique({
+        where: { id }
+      });
+      if (!prismaUser) {
+        throw new NotFoundException(`User with ID ${id} not found`);
+      }
+      return plainToInstance(User, prismaUser);
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException(`Failed to fetch user with ID ${id}`);
     }
-    return plainToInstance(User, prismaUser);
   }
+
+  async getUserByEmail(email: string): Promise<User> {
+    try {
+      const prismaUser = await this.prisma.user.findUnique({
+        where: { email },
+      });
+      if (!prismaUser) {
+        throw new NotFoundException(`User with email ${email} not found`);
+      }
+      return plainToInstance(User, prismaUser);
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException(`Failed to fetch user with email ${email}`);
+    }
+  }
+
   async createUser(data: CreateUserDto): Promise<User> {
-    const prismaUser = await this.prisma.user.create({
-      data
-    });
-    return plainToInstance(User, prismaUser);
+    try {
+      const prismaUser = await this.prisma.user.create({
+        data
+      });
+      return plainToInstance(User, prismaUser);
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        throw new ConflictException('User with this email already exists');
+      }
+      throw new InternalServerErrorException('Failed to create user');
+    }
   }
 
   async updateUser(id: string, data: UpdateUserDto): Promise<User> {
-    const prismaUser = await this.prisma.user.update({
-      where: {
-        id
-      },
-      data
-    });
-    return plainToInstance(User, prismaUser);
+    try {
+      const prismaUser = await this.prisma.user.update({
+        where: { id },
+        data
+      });
+      return plainToInstance(User, prismaUser);
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2025') {
+          throw new NotFoundException(`User with ID ${id} not found`);
+        }
+        if (error.code === 'P2002') {
+          throw new ConflictException('Email already in use');
+        }
+      }
+      throw new InternalServerErrorException(`Failed to update user with ID ${id}`);
+    }
   }
 
   async deleteUser(id: string): Promise<User> {
-    const prismaUser = await this.prisma.user.delete({
-      where: {
-        id
-      },
-    });
-    return plainToInstance(User, prismaUser);
+    try {
+      const prismaUser = await this.prisma.user.delete({
+        where: { id },
+      });
+      return plainToInstance(User, prismaUser);
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+        throw new NotFoundException(`User with ID ${id} not found`);
+      }
+      throw new InternalServerErrorException(`Failed to delete user with ID ${id}`);
+    }
   }
 }

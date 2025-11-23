@@ -5,7 +5,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 @Controller("users")
 export class UserController {
   constructor(private readonly userService : UserService) {}
-  @UseGuards(JwtAuthGuard)
+  //@UseGuards(JwtAuthGuard)
   @Get()
   async getAllUsers(){
     return this.userService.getAllUsers()
@@ -24,7 +24,7 @@ export class UserController {
   async deleteUser(@Param("id") id: string){
     return this.userService.deleteUser(id)
   }
-   @UseGuards(JwtAuthGuard)
+   //@UseGuards(JwtAuthGuard)
   @Put(":id")
   async updateUser(@Param("id") id: string, @Body() data : User){
     return this.userService.updateUser(id, data)

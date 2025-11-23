@@ -7,6 +7,7 @@ import { MessagesModule } from './messages/messages.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
+import { GateWaytModule } from './websockets/websocket.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { APP_GUARD } from '@nestjs/core';
     AuthModule, 
     ChatsModule, 
     MessagesModule,
+    GateWaytModule
   ],
   controllers: [],
   providers: [
