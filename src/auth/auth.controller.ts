@@ -29,7 +29,7 @@ export class AuthController {
     if (!user) {
        throw new UnauthorizedException('Invalid credentials');
     }
-    const access_token  = await this.authService.login(user);
+    const access_token  = await this.authService.login(user, user.role);
     
     response.cookie('access_token', access_token, {
   httpOnly: true,
@@ -47,7 +47,7 @@ export class AuthController {
     if(!newUser){
       throw new Error("Something went wrong")
     }
-    return this.authService.login(newUser)
+    return this.authService.login(newUser, newUser.role)
   }
   @UseGuards(JwtAuthGuard)
   @Post('refresh')

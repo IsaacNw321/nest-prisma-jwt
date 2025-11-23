@@ -19,7 +19,6 @@ async function bootstrap() {
     });
     app.useWebSocketAdapter(new SocketIoAdapter(app, frontendUrl));
     await app.listen(port);
-    console.log(`Server (HTTP & WS) running on: ${await app.getUrl()}`);
 }
 
 bootstrap();
