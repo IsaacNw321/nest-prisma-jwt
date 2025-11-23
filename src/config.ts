@@ -1,1 +1,3 @@
-export const MySecret = "api-auth-secret"
+const secret = process.env.JWT_SECRET;
+
+export const MySecret = secret
