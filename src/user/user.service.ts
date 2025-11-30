@@ -49,19 +49,30 @@ export class UserService {
     }
   }
 
-  async createUser(data: CreateUserDto): Promise<User> {
-    try {
-      const prismaUser = await this.prisma.user.create({
-        data
+ async createUser(data: CreateUserDto): Promise<User | string> {
+  const MAX_USERS = 50;
+  try {
+    const result = await this.prisma.$transaction(async (tx) => {
+      const userCount = await tx.user.count();
+      if (userCount >= MAX_USERS) {
+        throw { message: "Too much users", code: "MAX_USERS_EXCEEDED" };
+      }
+      const prismaUser = await tx.user.create({
+        data,
       });
       return plainToInstance(User, prismaUser);
-    } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
-        throw new ConflictException('User with this email already exists');
-      }
-      throw new InternalServerErrorException('Failed to create user');
+    });
+    return result; 
+  } catch (error) {
+    if (typeof error === 'object' && error !== null && 'code' in error && error.code === 'MAX_USERS_EXCEEDED') {
+      return "Too much users"; 
     }
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      throw new ConflictException('User with this email already exists');
+    }
+    throw new InternalServerErrorException('Failed to create user');
   }
+}
 
   async updateUser(id: string, data: UpdateUserDto): Promise<User> {
     try {
