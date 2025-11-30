@@ -49,7 +49,7 @@ export class UserService {
     }
   }
 
- async createUser(data: CreateUserDto): Promise<User | string> {
+ async createUser(data: CreateUserDto): Promise<User | null> {
   const MAX_USERS = 50;
   try {
     const result = await this.prisma.$transaction(async (tx) => {
@@ -65,7 +65,7 @@ export class UserService {
     return result; 
   } catch (error) {
     if (typeof error === 'object' && error !== null && 'code' in error && error.code === 'MAX_USERS_EXCEEDED') {
-      return "Too much users"; 
+      return null; 
     }
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
       throw new ConflictException('User with this email already exists');

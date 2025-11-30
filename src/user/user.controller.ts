@@ -14,12 +14,12 @@ export class UserController {
   async getUserById(@Param("id") id: string){
     return this.userService.getUserById(id)
   }
-   @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Delete(":id")
   async deleteUser(@Param("id") id: string){
     return this.userService.deleteUser(id)
   }
-   @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Patch(":id")
   async updateUser(@Param("id") id: string, @Body() data : User){
     return this.userService.updateUser(id, data)

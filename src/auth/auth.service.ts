@@ -13,7 +13,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-async createUser(data: CreateUserDto) : Promise<User> {
+async createUser(data: CreateUserDto) : Promise<User| null> {
     const hashedPassword = await bcrypt.hash(data.password, 10);
     const saveUser = {
       ...data,
