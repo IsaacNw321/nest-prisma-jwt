@@ -14,7 +14,8 @@ export class ChatsService {
         try {
             const prismaChats = await this.prisma.chat.findMany({
                 include: {
-                    users: true
+                    users: true,
+                    messages : true
                 }
             });
             return plainToInstance(Chat, prismaChats);
