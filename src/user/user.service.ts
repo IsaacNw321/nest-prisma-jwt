@@ -12,7 +12,15 @@ export class UserService {
 
   async getAllUsers(): Promise<User[]> {
     try {
-      const prismaUsers = await this.prisma.user.findMany();
+      const prismaUsers = await this.prisma.user.findMany({
+        include : {
+          chats : {
+            include : {
+              users : true
+            }
+          }
+        }
+      });
       return plainToInstance(User, prismaUsers);
     } catch (error) {
       throw new InternalServerErrorException('Failed to fetch users');
@@ -96,14 +104,55 @@ export class UserService {
 
   async deleteUser(id: string): Promise<User> {
     try {
-      const prismaUser = await this.prisma.user.delete({
+    const userChats = await this.prisma.chat.findMany({
+      where: {
+        users: {
+          some: {
+            id: id,
+          },
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    const chatIdsToDelete = userChats.map(chat => chat.id);
+    const [
+      deletedChatMessages, 
+      deletedChats, 
+      deletedUserMessages, 
+      deletedUser
+    ] = await this.prisma.$transaction([
+        
+      this.prisma.message.deleteMany({
+        where: {
+          chatId: {
+            in: chatIdsToDelete,
+          },
+        },
+      }),
+
+      this.prisma.chat.deleteMany({
+        where: {
+          id: {
+            in: chatIdsToDelete,
+          },
+        },
+      }),
+      this.prisma.message.deleteMany({
+        where: { fromId: id },
+      }),
+      this.prisma.user.delete({
         where: { id },
-      });
-      return plainToInstance(User, prismaUser);
+      }),
+    ]);
+      return plainToInstance(User, deletedUser);
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
         throw new NotFoundException(`User with ID ${id} not found`);
       }
+      console.log(error)
       throw new InternalServerErrorException(`Failed to delete user with ID ${id}`);
     }
   }
